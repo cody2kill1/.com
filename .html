@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web AI</title>
+</head>
+<body>
+    <h1>Web AI</h1>
+    <div id="chat"></div>
+    <button id="startListening">Start Listening (Press Enter)</button>
+
+    <script>
+        const chat = document.getElementById('chat');
+        const startListening = document.getElementById('startListening');
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        let listening = false;
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                if (listening) {
+                    stopSpeechRecognition();
+                } else {
+                    startSpeechRecognition();
+                }
+            }
+        });
+
+        startListening.addEventListener('click', function() {
+            if (listening) {
+                stopSpeechRecognition();
+            } else {
+                startSpeechRecognition();
+            }
+        });
+
+        recognition.onresult = function(event) {
+            const command = event.results[0][0].transcript.toLowerCase().trim();
+            chat.innerHTML += `<div>You: ${command}</div>`;
+            processCommand(command);
+        };
+
+        recognition.onend = function() {
+            listening = false;
+            startListening.textContent = 'Start Listening (Press Enter)';
+        };
+
+        function startSpeechRecognition() {
+            recognition.start();
+            listening = true;
+            startListening.textContent = 'Stop Listening (Press Enter)';
+        }
+
+        function stopSpeechRecognition() {
+            recognition.stop();
+            listening = false;
+            startListening.textContent = 'Start Listening (Press Enter)';
+        }
+
+        function processCommand(command) {
+            if (command.includes('open google')) {
+                navigateTo('https://www.google.com');
+            } else if (command.includes('open youtube')) {
+                navigateTo('https://www.youtube.com');
+            } else {
+                chat.innerHTML += `<div>Web AI: I didn't understand that command.</div>`;
+            }
+        }
+
+        function navigateTo(url) {
+            window.location.href = url;
+            chat.innerHTML += `<div>Web AI: Opening ${url}</div>`;
+        }
+    </script>
+</body>
+</html>
